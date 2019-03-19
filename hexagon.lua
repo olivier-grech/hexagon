@@ -1,10 +1,10 @@
 local hexagon = {}
 
 function hexagon.hexagon(x, y, hexagonOptions)
-    vertical = hexagonOptions.vertical
-    hexagonSize = hexagonOptions.hexagonSize
+    local vertical = hexagonOptions.vertical
+    local hexagonSize = hexagonOptions.hexagonSize
 
-    vertices = {}
+    local vertices = {}
 
     if vertical then
         table.insert(vertices, x)
@@ -26,7 +26,7 @@ function hexagon.hexagon(x, y, hexagonOptions)
 end
 
 function hexagon.grid(gridOptions)
-    gridSize = gridOptions.gridSize
+    local gridSize = gridOptions.gridSize
 
     love.graphics.setCanvas(canvas)
     love.graphics.clear()
@@ -44,9 +44,9 @@ end
 
 -- Given the coordinates of an hexagon in the grid, return the coordinates of its center in the plan
 function hexagon.toPlanCoordinates(x, y, gridOptions)
-    vertical = gridOptions.hexagonOptions.vertical
-    hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    shifted = gridOptions.shifted
+    local vertical = gridOptions.hexagonOptions.vertical
+    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
+    local shifted = gridOptions.shifted
 
     if vertical then
         hx = x * 2 * hexagonSize * (math.sin(math.pi / 3))
@@ -69,11 +69,11 @@ end
 
 -- Given the coordinates of a point in the plan, return the coordinates of the hexagon under that point in the grid
 function hexagon.toHexagonCoordinates(x, y, gridOptions)
-    vertical = gridOptions.hexagonOptions.vertical
-    gridSize = gridOptions.gridSize
+    local vertical = gridOptions.hexagonOptions.vertical
+    local gridSize = gridOptions.gridSize
 
-    resultX = 0
-    resultY = 0
+    local resultX = 0
+    local resultY = 0
 
     if vertical then
         resultX, resultY = toHexagonCoordinatesVertical(x, y, gridOptions)
@@ -91,15 +91,15 @@ function hexagon.toHexagonCoordinates(x, y, gridOptions)
 end
 
 function toHexagonCoordinatesHorizontal(x, y, gridOptions)
-    hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    shifted = gridOptions.shifted
+    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
+    local shifted = gridOptions.shifted
 
-    tileX = 0
-    tileY = 0
-    tileThirdWidth = hexagonSize * math.cos(math.pi / 3)
-    tileWidth = 3 * tileThirdWidth
-    tileHalfHeight = hexagonSize * math.cos(math.pi / 6)
-    tileHeight = 2 * tileHalfHeight
+    local tileX = 0
+    local tileY = 0
+    local tileThirdWidth = hexagonSize * math.cos(math.pi / 3)
+    local tileWidth = 3 * tileThirdWidth
+    local tileHalfHeight = hexagonSize * math.cos(math.pi / 6)
+    local tileHeight = 2 * tileHalfHeight
 
     -- We use math.ceil because we start the coordinates at 1 and not 0
     tileX = math.ceil(x / tileWidth)
@@ -160,15 +160,15 @@ function toHexagonCoordinatesHorizontal(x, y, gridOptions)
 end
 
 function toHexagonCoordinatesVertical(x, y, gridOptions)
-    hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    shifted = gridOptions.shifted
+    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
+    local shifted = gridOptions.shifted
 
-    tileX = 0
-    tileY = 0
-    tileThirdHeight = hexagonSize * math.cos(math.pi / 3)
-    tileHeight = 3 * tileThirdHeight
-    tileHalfWidth = hexagonSize * math.cos(math.pi / 6)
-    tileWidth = 2 * tileHalfWidth
+    local tileX = 0
+    local tileY = 0
+    local tileThirdHeight = hexagonSize * math.cos(math.pi / 3)
+    local tileHeight = 3 * tileThirdHeight
+    local tileHalfWidth = hexagonSize * math.cos(math.pi / 6)
+    local tileWidth = 2 * tileHalfWidth
 
     -- We use math.ceil because we start the coordinates at 1 and not 0
     tileY = math.ceil(y / tileHeight)
