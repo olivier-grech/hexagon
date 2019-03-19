@@ -1,5 +1,147 @@
 local hexagon = {}
 
+local function distanceBetween(x1, y1, x2, y2)
+    return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+end
+
+local function toHexagonCoordinatesHorizontal(x, y, gridOptions)
+    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
+    local shifted = gridOptions.shifted
+
+    local tileX = 0
+    local tileY = 0
+    local tileThirdWidth = hexagonSize * math.cos(math.pi / 3)
+    local tileWidth = 3 * tileThirdWidth
+    local tileHalfHeight = hexagonSize * math.cos(math.pi / 6)
+    local tileHeight = 2 * tileHalfHeight
+
+    -- We use math.ceil because we start the coordinates at 1 and not 0
+    tileX = math.ceil(x / tileWidth)
+
+    if math.fmod(x, tileWidth) < tileThirdWidth then
+        if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
+            tileY = math.ceil(y / tileHeight)
+            offset = 0
+        else
+            tileY = math.ceil((y - tileHalfHeight) / tileHeight)
+            offset = tileHalfHeight
+        end
+
+        -- Uncertain, so we check which hexagon is the nearest
+        xA = (tileX - 1) * tileWidth + hexagonSize
+        xB = (tileX - 1) * tileWidth + tileThirdWidth - hexagonSize
+        xC = xA
+        yA = (tileY - 1) * tileHeight + offset
+        yB = yA + tileHeight / 2
+        yC = yB + tileHeight / 2
+
+        distanceToA = distanceBetween(x, y, xA, yA)
+        distanceToB = distanceBetween(x, y, xB, yB)
+        distanceToC = distanceBetween(x, y, xC, yC)
+
+        if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
+            hexagonA = {X = tileX, Y = tileY - 1}
+            hexagonC = {X = tileX, Y = tileY}
+        else
+            hexagonA = {X = tileX, Y = tileY}
+            hexagonC = {X = tileX, Y = tileY + 1}
+        end
+        hexagonB = {X = tileX - 1, Y = tileY}
+
+        possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
+        distances = {}
+
+        for k in pairs(possibleHexagons) do
+            table.insert(distances, k)
+        end
+        table.sort(distances)
+
+        closerHexagon = possibleHexagons[distances[1]]
+        resultX = closerHexagon.X
+        resultY = closerHexagon.Y
+    else
+        if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
+            tileY = math.ceil((y - tileHalfHeight) / tileHeight)
+        else
+            tileY = math.ceil(y / tileHeight)
+        end
+
+        resultX = tileX
+        resultY = tileY
+    end
+
+    return resultX, resultY
+end
+
+local function toHexagonCoordinatesVertical(x, y, gridOptions)
+    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
+    local shifted = gridOptions.shifted
+
+    local tileX = 0
+    local tileY = 0
+    local tileThirdHeight = hexagonSize * math.cos(math.pi / 3)
+    local tileHeight = 3 * tileThirdHeight
+    local tileHalfWidth = hexagonSize * math.cos(math.pi / 6)
+    local tileWidth = 2 * tileHalfWidth
+
+    -- We use math.ceil because we start the coordinates at 1 and not 0
+    tileY = math.ceil(y / tileHeight)
+
+    if math.fmod(y, tileHeight) < tileThirdHeight then
+        if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
+            tileX = math.ceil(x / tileWidth)
+            offset = 0
+        else
+            tileX = math.ceil((x - tileHalfWidth) / tileWidth)
+            offset = tileHalfWidth
+        end
+
+        -- Uncertain, so we check which hexagon is the nearest
+        yA = (tileY - 1) * tileHeight + hexagonSize
+        yB = (tileY - 1) * tileHeight + tileThirdHeight - hexagonSize
+        yC = yA
+        xA = (tileX - 1) * tileWidth + offset
+        xB = xA + tileWidth / 2
+        xC = xB + tileWidth / 2
+
+        distanceToA = distanceBetween(x, y, xA, yA)
+        distanceToB = distanceBetween(x, y, xB, yB)
+        distanceToC = distanceBetween(x, y, xC, yC)
+
+        if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
+            hexagonA = {Y = tileY, X = tileX - 1}
+            hexagonC = {Y = tileY, X = tileX}
+        else
+            hexagonA = {Y = tileY, X = tileX}
+            hexagonC = {Y = tileY, X = tileX + 1}
+        end
+        hexagonB = {Y = tileY - 1, X = tileX}
+
+        possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
+        distances = {}
+
+        for k in pairs(possibleHexagons) do
+            table.insert(distances, k)
+        end
+        table.sort(distances)
+
+        closerHexagon = possibleHexagons[distances[1]]
+        resultX = closerHexagon.X
+        resultY = closerHexagon.Y
+    else
+        if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
+            tileX = math.ceil((x - tileHalfWidth) / tileWidth)
+        else
+            tileX = math.ceil(x / tileWidth)
+        end
+
+        resultX = tileX
+        resultY = tileY
+    end
+
+    return resultX, resultY
+end
+
 function hexagon.hexagon(x, y, hexagonOptions)
     local vertical = hexagonOptions.vertical
     local hexagonSize = hexagonOptions.hexagonSize
@@ -88,148 +230,6 @@ function hexagon.toHexagonCoordinates(x, y, gridOptions)
     end
 
     return resultX, resultY
-end
-
-function toHexagonCoordinatesHorizontal(x, y, gridOptions)
-    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    local shifted = gridOptions.shifted
-
-    local tileX = 0
-    local tileY = 0
-    local tileThirdWidth = hexagonSize * math.cos(math.pi / 3)
-    local tileWidth = 3 * tileThirdWidth
-    local tileHalfHeight = hexagonSize * math.cos(math.pi / 6)
-    local tileHeight = 2 * tileHalfHeight
-
-    -- We use math.ceil because we start the coordinates at 1 and not 0
-    tileX = math.ceil(x / tileWidth)
-
-    if math.fmod(x, tileWidth) < tileThirdWidth then
-        if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
-            tileY = math.ceil(y / tileHeight)
-            offset = 0
-        else
-            tileY = math.ceil((y - tileHalfHeight) / tileHeight)
-            offset = tileHalfHeight
-        end
-
-        -- Uncertain, so we check which hexagon is the nearest
-        xA = (tileX - 1) * tileWidth + hexagonSize
-        xB = (tileX - 1) * tileWidth + tileThirdWidth - hexagonSize
-        xC = xA
-        yA = (tileY - 1) * tileHeight + offset
-        yB = yA + tileHeight / 2
-        yC = yB + tileHeight / 2
-
-        distanceToA = distanceBetween(x, y, xA, yA)
-        distanceToB = distanceBetween(x, y, xB, yB)
-        distanceToC = distanceBetween(x, y, xC, yC)
-
-        if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
-            hexagonA = {X = tileX, Y = tileY - 1}
-            hexagonC = {X = tileX, Y = tileY}
-        else
-            hexagonA = {X = tileX, Y = tileY}
-            hexagonC = {X = tileX, Y = tileY + 1}
-        end
-        hexagonB = {X = tileX - 1, Y = tileY}
-
-        possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
-        distances = {}
-
-        for k in pairs(possibleHexagons) do
-            table.insert(distances, k)
-        end
-        table.sort(distances)
-
-        closerHexagon = possibleHexagons[distances[1]]
-        resultX = closerHexagon.X
-        resultY = closerHexagon.Y
-    else
-        if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
-            tileY = math.ceil((y - tileHalfHeight) / tileHeight)
-        else
-            tileY = math.ceil(y / tileHeight)
-        end
-
-        resultX = tileX
-        resultY = tileY
-    end
-
-    return resultX, resultY
-end
-
-function toHexagonCoordinatesVertical(x, y, gridOptions)
-    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    local shifted = gridOptions.shifted
-
-    local tileX = 0
-    local tileY = 0
-    local tileThirdHeight = hexagonSize * math.cos(math.pi / 3)
-    local tileHeight = 3 * tileThirdHeight
-    local tileHalfWidth = hexagonSize * math.cos(math.pi / 6)
-    local tileWidth = 2 * tileHalfWidth
-
-    -- We use math.ceil because we start the coordinates at 1 and not 0
-    tileY = math.ceil(y / tileHeight)
-
-    if math.fmod(y, tileHeight) < tileThirdHeight then
-        if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
-            tileX = math.ceil(x / tileWidth)
-            offset = 0
-        else
-            tileX = math.ceil((x - tileHalfWidth) / tileWidth)
-            offset = tileHalfWidth
-        end
-
-        -- Uncertain, so we check which hexagon is the nearest
-        yA = (tileY - 1) * tileHeight + hexagonSize
-        yB = (tileY - 1) * tileHeight + tileThirdHeight - hexagonSize
-        yC = yA
-        xA = (tileX - 1) * tileWidth + offset
-        xB = xA + tileWidth / 2
-        xC = xB + tileWidth / 2
-
-        distanceToA = distanceBetween(x, y, xA, yA)
-        distanceToB = distanceBetween(x, y, xB, yB)
-        distanceToC = distanceBetween(x, y, xC, yC)
-
-        if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
-            hexagonA = {Y = tileY, X = tileX - 1}
-            hexagonC = {Y = tileY, X = tileX}
-        else
-            hexagonA = {Y = tileY, X = tileX}
-            hexagonC = {Y = tileY, X = tileX + 1}
-        end
-        hexagonB = {Y = tileY - 1, X = tileX}
-
-        possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
-        distances = {}
-
-        for k in pairs(possibleHexagons) do
-            table.insert(distances, k)
-        end
-        table.sort(distances)
-
-        closerHexagon = possibleHexagons[distances[1]]
-        resultX = closerHexagon.X
-        resultY = closerHexagon.Y
-    else
-        if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
-            tileX = math.ceil((x - tileHalfWidth) / tileWidth)
-        else
-            tileX = math.ceil(x / tileWidth)
-        end
-
-        resultX = tileX
-        resultY = tileY
-    end
-
-    return resultX, resultY
-end
-
-function distanceBetween(x1, y1, x2, y2)
-    return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
 end
 
 return hexagon
