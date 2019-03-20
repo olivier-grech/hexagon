@@ -18,6 +18,13 @@ local function toHexagonCoordinatesHorizontal(x, y, gridOptions)
     -- We use math.ceil because we start the coordinates at 1 and not 0
     tileX = math.ceil(x / tileWidth)
 
+    local offset
+    local hexagonA
+    local hexagonB
+    local hexagonC
+    local resultX
+    local resultY
+
     if math.fmod(x, tileWidth) < tileThirdWidth then
         if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
             tileY = math.ceil(y / tileHeight)
@@ -28,16 +35,16 @@ local function toHexagonCoordinatesHorizontal(x, y, gridOptions)
         end
 
         -- Uncertain, so we check which hexagon is the nearest
-        xA = (tileX - 1) * tileWidth + hexagonSize
-        xB = (tileX - 1) * tileWidth + tileThirdWidth - hexagonSize
-        xC = xA
-        yA = (tileY - 1) * tileHeight + offset
-        yB = yA + tileHeight / 2
-        yC = yB + tileHeight / 2
+        local xA = (tileX - 1) * tileWidth + hexagonSize
+        local xB = (tileX - 1) * tileWidth + tileThirdWidth - hexagonSize
+        local xC = xA
+        local yA = (tileY - 1) * tileHeight + offset
+        local yB = yA + tileHeight / 2
+        local yC = yB + tileHeight / 2
 
-        distanceToA = distanceBetween(x, y, xA, yA)
-        distanceToB = distanceBetween(x, y, xB, yB)
-        distanceToC = distanceBetween(x, y, xC, yC)
+        local distanceToA = distanceBetween(x, y, xA, yA)
+        local distanceToB = distanceBetween(x, y, xB, yB)
+        local distanceToC = distanceBetween(x, y, xC, yC)
 
         if (not shifted and tileX % 2 == 0) or (shifted and tileX % 2 == 1) then
             hexagonA = {X = tileX, Y = tileY - 1}
@@ -48,15 +55,15 @@ local function toHexagonCoordinatesHorizontal(x, y, gridOptions)
         end
         hexagonB = {X = tileX - 1, Y = tileY}
 
-        possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
-        distances = {}
+        local possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
+        local distances = {}
 
         for k in pairs(possibleHexagons) do
             table.insert(distances, k)
         end
         table.sort(distances)
 
-        closerHexagon = possibleHexagons[distances[1]]
+        local closerHexagon = possibleHexagons[distances[1]]
         resultX = closerHexagon.X
         resultY = closerHexagon.Y
     else
@@ -87,6 +94,13 @@ local function toHexagonCoordinatesVertical(x, y, gridOptions)
     -- We use math.ceil because we start the coordinates at 1 and not 0
     tileY = math.ceil(y / tileHeight)
 
+    local offset
+    local hexagonA
+    local hexagonB
+    local hexagonC
+    local resultX
+    local resultY
+
     if math.fmod(y, tileHeight) < tileThirdHeight then
         if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
             tileX = math.ceil(x / tileWidth)
@@ -97,16 +111,16 @@ local function toHexagonCoordinatesVertical(x, y, gridOptions)
         end
 
         -- Uncertain, so we check which hexagon is the nearest
-        yA = (tileY - 1) * tileHeight + hexagonSize
-        yB = (tileY - 1) * tileHeight + tileThirdHeight - hexagonSize
-        yC = yA
-        xA = (tileX - 1) * tileWidth + offset
-        xB = xA + tileWidth / 2
-        xC = xB + tileWidth / 2
+        local yA = (tileY - 1) * tileHeight + hexagonSize
+        local yB = (tileY - 1) * tileHeight + tileThirdHeight - hexagonSize
+        local yC = yA
+        local xA = (tileX - 1) * tileWidth + offset
+        local xB = xA + tileWidth / 2
+        local xC = xB + tileWidth / 2
 
-        distanceToA = distanceBetween(x, y, xA, yA)
-        distanceToB = distanceBetween(x, y, xB, yB)
-        distanceToC = distanceBetween(x, y, xC, yC)
+        local distanceToA = distanceBetween(x, y, xA, yA)
+        local distanceToB = distanceBetween(x, y, xB, yB)
+        local distanceToC = distanceBetween(x, y, xC, yC)
 
         if (not shifted and tileY % 2 == 0) or (shifted and tileY % 2 == 1) then
             hexagonA = {Y = tileY, X = tileX - 1}
@@ -117,15 +131,15 @@ local function toHexagonCoordinatesVertical(x, y, gridOptions)
         end
         hexagonB = {Y = tileY - 1, X = tileX}
 
-        possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
-        distances = {}
+        local possibleHexagons = {[distanceToA] = hexagonA, [distanceToB] = hexagonB, [distanceToC] = hexagonC}
+        local distances = {}
 
         for k in pairs(possibleHexagons) do
             table.insert(distances, k)
         end
         table.sort(distances)
 
-        closerHexagon = possibleHexagons[distances[1]]
+        local closerHexagon = possibleHexagons[distances[1]]
         resultX = closerHexagon.X
         resultY = closerHexagon.Y
     else
@@ -176,7 +190,7 @@ function hexagon.grid(gridOptions)
     love.graphics.setColor(1, 0, 0, 1)
     for i = 1, gridSize do
         for j = 1, gridSize do
-            hx, hy = hexagon.toPlanCoordinates(i, j, gridOptions)
+            local hx, hy = hexagon.toPlanCoordinates(i, j, gridOptions)
             hexagon.hexagon(hx, hy, gridOptions.hexagonOptions)
         end
     end
@@ -189,6 +203,9 @@ function hexagon.toPlanCoordinates(x, y, gridOptions)
     local vertical = gridOptions.hexagonOptions.vertical
     local hexagonSize = gridOptions.hexagonOptions.hexagonSize
     local shifted = gridOptions.shifted
+
+    local hx
+    local hy
 
     if vertical then
         hx = x * 2 * hexagonSize * (math.sin(math.pi / 3))
