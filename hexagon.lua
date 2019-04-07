@@ -4,9 +4,31 @@ local function distanceBetween(x1, y1, x2, y2)
     return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
 end
 
-local function toHexagonCoordinatesHorizontal(x, y, gridOptions)
-    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    local shifted = gridOptions.shifted
+local function drawHexagon(x, y, hexagonSize, pointyTopped)
+    local vertices = {}
+
+    if pointyTopped then
+        table.insert(vertices, x)
+        table.insert(vertices, y + hexagonSize)
+        for i = 1, 5 do
+            table.insert(vertices, x + hexagonSize * math.sin(i * math.pi / 3))
+            table.insert(vertices, y + hexagonSize * math.cos(i * math.pi / 3))
+        end
+    else
+        table.insert(vertices, x + hexagonSize)
+        table.insert(vertices, y)
+        for i = 1, 5 do
+            table.insert(vertices, x + hexagonSize * math.cos(i * math.pi / 3))
+            table.insert(vertices, y + hexagonSize * math.sin(i * math.pi / 3))
+        end
+    end
+
+    love.graphics.polygon("line", vertices)
+end
+
+local function toHexagonCoordinatesHorizontal(x, y, grid)
+    local hexagonSize = grid.hexagonSize
+    local shifted = grid.shifted
 
     local tileX = 0
     local tileY = 0
@@ -80,9 +102,9 @@ local function toHexagonCoordinatesHorizontal(x, y, gridOptions)
     return resultX, resultY
 end
 
-local function toHexagonCoordinatesVertical(x, y, gridOptions)
-    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    local shifted = gridOptions.shifted
+local function toHexagonCoordinatesVertical(x, y, grid)
+    local hexagonSize = grid.hexagonSize
+    local shifted = grid.shifted
 
     local tileX = 0
     local tileY = 0
@@ -156,58 +178,44 @@ local function toHexagonCoordinatesVertical(x, y, gridOptions)
     return resultX, resultY
 end
 
-function hexagon.hexagon(x, y, hexagonOptions)
-    local vertical = hexagonOptions.vertical
-    local hexagonSize = hexagonOptions.hexagonSize
+function hexagon.grid(width, height, hexagonSize, pointyTopped, shifted)
+        local grid = {}
+        assert(type(width) == "number", "width expects a number")
+        grid.width = width
+        assert(type(height) == "number", "height expects a number")
+        grid.height = height
+        assert(type(hexagonSize) == "number", "hexagonSize expects a number")
+        grid.hexagonSize = hexagonSize
+        assert(type(pointyTopped) == "boolean", "pointyTopped expects a boolean")
+        grid.pointyTopped = pointyTopped
+        assert(type(shifted) == "boolean", "shifted expects a boolean")
+        grid.shifted = shifted
 
-    local vertices = {}
-
-    if vertical then
-        table.insert(vertices, x)
-        table.insert(vertices, y + hexagonSize)
-        for i = 1, 5 do
-            table.insert(vertices, x + hexagonSize * math.sin(i * math.pi / 3))
-            table.insert(vertices, y + hexagonSize * math.cos(i * math.pi / 3))
-        end
-    else
-        table.insert(vertices, x + hexagonSize)
-        table.insert(vertices, y)
-        for i = 1, 5 do
-            table.insert(vertices, x + hexagonSize * math.cos(i * math.pi / 3))
-            table.insert(vertices, y + hexagonSize * math.sin(i * math.pi / 3))
-        end
-    end
-
-    love.graphics.polygon("line", vertices)
+        return grid
 end
 
-function hexagon.grid(gridOptions)
-    local gridSize = gridOptions.gridSize
-
+function hexagon.drawGrid(grid, canvas)
     love.graphics.setCanvas(canvas)
-    love.graphics.clear()
-    love.graphics.setBlendMode("alpha")
-    love.graphics.setColor(1, 0, 0, 1)
-    for i = 1, gridSize do
-        for j = 1, gridSize do
-            local hx, hy = hexagon.toPlanCoordinates(i, j, gridOptions)
-            hexagon.hexagon(hx, hy, gridOptions.hexagonOptions)
+    for i = 1, grid.width do
+        for j = 1, grid.height do
+            local hx, hy = hexagon.toPlanCoordinates(i, j, grid)
+            drawHexagon(hx, hy, grid.hexagonSize, grid.pointyTopped)
         end
     end
 
     love.graphics.setCanvas()
 end
 
+
 -- Given the coordinates of an hexagon in the grid, return the coordinates of its center in the plan
-function hexagon.toPlanCoordinates(x, y, gridOptions)
-    local vertical = gridOptions.hexagonOptions.vertical
-    local hexagonSize = gridOptions.hexagonOptions.hexagonSize
-    local shifted = gridOptions.shifted
+function hexagon.toPlanCoordinates(x, y, grid)
+    local hexagonSize = grid.hexagonSize
+    local shifted = grid.shifted
 
     local hx
     local hy
 
-    if vertical then
+    if grid.pointyTopped then
         hx = x * 2 * hexagonSize * (math.sin(math.pi / 3))
         hy = hexagonSize + (y - 1) * hexagonSize * (math.cos(math.pi / 3) + 1)
 
@@ -223,25 +231,22 @@ function hexagon.toPlanCoordinates(x, y, gridOptions)
         end
     end
 
-    return hx + gridOptions.x, hy + gridOptions.y
+    return hx , hy
 end
 
 -- Given the coordinates of a point in the plan, return the coordinates of the hexagon under that point in the grid
-function hexagon.toHexagonCoordinates(x, y, gridOptions)
-    local vertical = gridOptions.hexagonOptions.vertical
-    local gridSize = gridOptions.gridSize
-
+function hexagon.toHexagonCoordinates(x, y, grid)
     local resultX = 0
     local resultY = 0
 
-    if vertical then
-        resultX, resultY = toHexagonCoordinatesVertical(x, y, gridOptions)
+    if grid.pointyTopped then
+        resultX, resultY = toHexagonCoordinatesVertical(x, y, grid)
     else
-        resultX, resultY = toHexagonCoordinatesHorizontal(x, y, gridOptions)
+        resultX, resultY = toHexagonCoordinatesHorizontal(x, y, grid)
     end
 
     -- Out of the grid
-    if resultX < 1 or resultX > gridSize or resultY < 1 or resultY > gridSize then
+    if resultX < 1 or resultX > grid.width or resultY < 1 or resultY > grid.height then
         resultX = -1
         resultY = -1
     end
