@@ -4,6 +4,31 @@ local function distanceBetween(x1, y1, x2, y2)
     return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
 end
 
+local function drawHexagon(x, y, hexagonOptions)
+    local vertical = hexagonOptions.vertical
+    local hexagonSize = hexagonOptions.hexagonSize
+
+    local vertices = {}
+
+    if vertical then
+        table.insert(vertices, x)
+        table.insert(vertices, y + hexagonSize)
+        for i = 1, 5 do
+            table.insert(vertices, x + hexagonSize * math.sin(i * math.pi / 3))
+            table.insert(vertices, y + hexagonSize * math.cos(i * math.pi / 3))
+        end
+    else
+        table.insert(vertices, x + hexagonSize)
+        table.insert(vertices, y)
+        for i = 1, 5 do
+            table.insert(vertices, x + hexagonSize * math.cos(i * math.pi / 3))
+            table.insert(vertices, y + hexagonSize * math.sin(i * math.pi / 3))
+        end
+    end
+
+    love.graphics.polygon("line", vertices)
+end
+
 local function toHexagonCoordinatesHorizontal(x, y, gridOptions)
     local hexagonSize = gridOptions.hexagonOptions.hexagonSize
     local shifted = gridOptions.shifted
@@ -156,31 +181,6 @@ local function toHexagonCoordinatesVertical(x, y, gridOptions)
     return resultX, resultY
 end
 
-function hexagon.hexagon(x, y, hexagonOptions)
-    local vertical = hexagonOptions.vertical
-    local hexagonSize = hexagonOptions.hexagonSize
-
-    local vertices = {}
-
-    if vertical then
-        table.insert(vertices, x)
-        table.insert(vertices, y + hexagonSize)
-        for i = 1, 5 do
-            table.insert(vertices, x + hexagonSize * math.sin(i * math.pi / 3))
-            table.insert(vertices, y + hexagonSize * math.cos(i * math.pi / 3))
-        end
-    else
-        table.insert(vertices, x + hexagonSize)
-        table.insert(vertices, y)
-        for i = 1, 5 do
-            table.insert(vertices, x + hexagonSize * math.cos(i * math.pi / 3))
-            table.insert(vertices, y + hexagonSize * math.sin(i * math.pi / 3))
-        end
-    end
-
-    love.graphics.polygon("line", vertices)
-end
-
 function hexagon.grid(gridOptions)
     local gridSize = gridOptions.gridSize
 
@@ -191,7 +191,7 @@ function hexagon.grid(gridOptions)
     for i = 1, gridSize do
         for j = 1, gridSize do
             local hx, hy = hexagon.toPlanCoordinates(i, j, gridOptions)
-            hexagon.hexagon(hx, hy, gridOptions.hexagonOptions)
+            drawHexagon(hx, hy, gridOptions.hexagonOptions)
         end
     end
 
