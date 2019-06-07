@@ -36,3 +36,5 @@ Given the coordinates `x, y` of a point, returns the coordinates of the hexagon
 under that point in `grid`.
 
 See the demo for an example.
+
+![example](example.gif)
