@@ -10,6 +10,7 @@ Return an object representing a grid of hexagon. Can be passed to the
 `hexagon.drawGrid` method in order to draw it on screen.
 * `width` is the number of hexagon on the horizontal side of the grid.
 * `height` is the number of hexagon on the vertical side of the grid.
+* `hexagonSize` is the size of the hexagons sides.
 * `pointyTopped` is a boolean that makes the hexagons pointy topped if true.
 * `shifted` is a boolean that makes the grid shifted if true.
 
