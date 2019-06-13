@@ -8,6 +8,7 @@ local function drawHexagon(x, y, hexagonSize, pointyTopped)
     local vertices = {}
 
     if pointyTopped then
+        -- If pointy topped, the first vertice is the bottom one
         table.insert(vertices, x)
         table.insert(vertices, y + hexagonSize)
         for i = 1, 5 do
@@ -15,6 +16,7 @@ local function drawHexagon(x, y, hexagonSize, pointyTopped)
             table.insert(vertices, y + hexagonSize * math.cos(i * math.pi / 3))
         end
     else
+        -- If flat topped, the first vertice is the right one
         table.insert(vertices, x + hexagonSize)
         table.insert(vertices, y)
         for i = 1, 5 do
